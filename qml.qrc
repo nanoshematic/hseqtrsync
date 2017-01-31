@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>SourceAndDest.qml</file>
+        <file>OptionsTab.qml</file>
+        <file>MainOptionsTabContent.qml</file>
+    </qresource>
+</RCC>
