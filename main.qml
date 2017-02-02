@@ -14,6 +14,9 @@ ApplicationWindow {
 //            onSendToQml: {
 //                labelCount.text = count // Устанавливаем счётчик в текстовый лейбл
 //            }
+            onSendConsoleOutput: {
+                ta.append(output)
+            }
         }
 
     visible: true
@@ -62,6 +65,7 @@ ApplicationWindow {
                 id : runRsync
                 text : "Запустить"
                 onClicked: {
+                    ta.text = "";
                     appCore.runAction();
                 }
             }
@@ -72,6 +76,13 @@ ApplicationWindow {
                 objectName: "field2"
                 placeholderText: "Введите второе число"
                 width: 700
+            }
+
+            TextArea {
+                id: ta
+                objectName: "rsyncOut"
+                width: 240
+                text: ""
             }
 
 

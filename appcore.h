@@ -2,7 +2,9 @@
 #define APPCORE_H
 
 #include <QObject>
+#include <QString>
 #include <QVariant>
+#include <string>
 
 class AppCore : public QObject
 {
@@ -12,12 +14,13 @@ public:
 
 signals:
     // Сигнал для передачи данных в qml-интерфейс
-//    void sendToQml(int count);
+    void sendConsoleOutput(QString output);
 
 public slots:
     // Слот для приёма данных из qml-интерфейса
-//    void receiveFromQml();
     void runAction();
+    void readyReadStandardOutput();
+    void readyReadStandardError();
 
 private:
 //    int count;  // Счетчик, которым будем оперировать

@@ -8,41 +8,57 @@
 #include <stdexcept>
 #include <string>
 #include <array>
+#include <QProcess>
+#include <QDebug>
 
 AppCore::AppCore(QObject *parent) : QObject(parent)
 {
 //    count = 0;
 }
 
-//void AppCore::receiveFromQml()
-//{
-//    count++;
-//    emit sendToQml(count);
-//}
+QProcess *myProcess;
 
-//execute command
-std::string exec(const char* cmd) {
-    std::array<char, 128> buffer;
-    std::string result;
-    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-    if (!pipe) throw std::runtime_error("popen() failed!");
-    while (!feof(pipe.get())) {
-        if (fgets(buffer.data(), 128, pipe.get()) != NULL)
-            result += buffer.data();
-    }
-    return result;
+void AppCore::readyReadStandardOutput(){
+    QString s_data = QString::fromLatin1(myProcess->readAllStandardOutput());
+    std::string output = s_data.toStdString();
+    std::cout << output << std::endl;
+    emit sendConsoleOutput(s_data);
+}
+
+void AppCore::readyReadStandardError(){
+    qDebug() << myProcess->readAllStandardError();
 }
 
 void AppCore::runAction()
 {
-//    QObject* cb = this->parent()->findChild<QObject*>("-R");
-    QList<QObject*> list = this->parent()->findChildren<QObject*>(QRegExp("^\-"));
+
+    QString program = "rsync";
+    QStringList arguments;
+//    arguments << "-r" << "-t" << "-v" << "--progress" << "-s" << "/home/alexey/1" << "/home/alexey/2";
+
+    // временая заглушка для теста до полной настройки чекбоксов
+    arguments << "-r" << "-t" << "-v" << "--progress" << "-s";
+
+    // Получение кодов всех элементв интерфейса, начинающихся с "-" (чекбоксы) с последующим добавлением этих кодов в качестве параметров
+    QList<QObject*> list = this->parent()->findChildren<QObject*>(QRegExp("^-"));
     for (QList<QObject*>::iterator i = list.begin(); i != list.end(); i++) {
         if ((*i)->property("checked").toBool() == true) {
-            std::cout << (*i)->property("objectName").toString().toStdString() << std::endl;
+//            parameters += (*i)->property("objectName").toString().toStdString() + " ";
+            arguments << (*i)->property("objectName").toString();
         }
     }
 
-    std::string res = exec("man rsync");
-    std::cout << "123" << res << std::endl;
+    QObject* sourceField = this->parent()->findChild<QObject*>("source");
+    QObject* destinationField = this->parent()->findChild<QObject*>("destination");
+
+    // Добавляем source и destionation
+    arguments << sourceField->property("text").toString();
+    arguments << destinationField->property("text").toString();
+
+    myProcess = new QProcess(parent());
+    myProcess->start(program, arguments);
+
+    connect(myProcess,SIGNAL(readyReadStandardOutput()),this,SLOT(readyReadStandardOutput()));
+    connect(myProcess,SIGNAL(readyReadStandardError()),this,SLOT(readyReadStandardError()));
+
 }
