@@ -6,6 +6,15 @@ CONFIG += c++11
 SOURCES += main.cpp \
     appcore.cpp
 
+lupdate_only {
+    SOURCES += ExtendedOptionsTabContent.qml \
+        main.qml \
+        OptionsTab.qml \
+        SourceAndDest.qml \
+        AdvancedOptionsTabContent.qml \
+        MainOptionsTabContent.qml
+}
+
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -15,4 +24,7 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
-    appcore.h
+    appcore.h \
+    translatontest.h
+
+TRANSLATIONS += QmlLanguage_ru.ts

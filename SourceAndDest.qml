@@ -10,7 +10,8 @@ Item {
     ColumnLayout {
         width : parent.width
         Text {
-            text: "Источник и назначение"
+//            text: "Источник и назначение"
+            text: qsTr("Source and Destination") + rootItem.emptyString
             font.bold: true
         }
 
@@ -24,12 +25,14 @@ Item {
                 id: source
                 width : 380
                 objectName: "source"
-                placeholderText: "Источник"
+//                placeholderText: "Источник"
+                placeholderText: qsTr("Source") + rootItem.emptyString
             }
 
             Button {
                 id : openButtonSource
-                text: "Открыть"
+//                text: "Открыть"
+                text: qsTr("Open") + rootItem.emptyString
                 width : 100
                 onClicked: {
                     pressedButton = 1;
@@ -43,13 +46,14 @@ Item {
                 id: destination
                 width : 380
                 objectName: "destination"
-                placeholderText: "Назначение"
+//                placeholderText: "Назначение"
+                placeholderText: qsTr("Destination") + rootItem.emptyString
             }
 
             Button {
                 id : openButtonDestination
                 width : 100
-                text: "Открыть"
+                text: qsTr("Open") + rootItem.emptyString
                 onClicked: {
                     pressedButton = 2;
                     fileDialogLoad.open()
