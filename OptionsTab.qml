@@ -7,10 +7,13 @@ Item {
     property alias bar: bar
     ColumnLayout {
         anchors.fill: parent
+        Layout.fillHeight: true
+        Layout.fillWidth: true
         TabView {
             id: bar
             width: 600
             Layout.fillWidth: true
+            Layout.fillHeight: true
             Tab {
                 id: tab1
                 width : 600
@@ -24,8 +27,9 @@ Item {
             }
             Tab {
                 width : 600
-                title: qsTr("Advanced options") + rootItem.emptyString
 //                title: qsTr("Расширенные опции") + rootItem.emptyString
+                title: qsTr("Advanced options") + rootItem.emptyString
+
                 Item {
                     id: advancedTab
                     AdvancedOptionsTabContent {

@@ -11,7 +11,7 @@ Item {
         Grid {
             width: 590
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            rows: 6
+            rows: 7
             columns : 2
             spacing : 5
 
@@ -89,6 +89,20 @@ Item {
                 text: qsTr("Protect remote args") + rootItem.emptyString
 //                text: qsTr("Автоматически экранировать аргументы")
                 checked: true
+            }
+
+        }
+        Grid{
+            Layout.alignment: Qt.AlignHLeft | Qt.AlignTop
+            spacing: 5
+            Layout.leftMargin:  5
+            columns: 1
+            Text{
+                text:'Additional options'
+            }
+            TextField{
+                objectName: "addOpt"
+                width : 580
             }
         }
     }

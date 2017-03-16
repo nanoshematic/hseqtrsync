@@ -65,8 +65,10 @@ Item {
 
     FileDialog {
         id: fileDialogLoad
+        objectName: "fileDialogLoad"
+        width: 700
         folder: "."
-        selectFolder: true
+        selectFolder: appCore.getSyncFolders()
         title: "Choose a file to open"
         selectMultiple: false
 

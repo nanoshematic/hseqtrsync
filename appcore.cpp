@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <QDebug>
 
+
 AppCore::AppCore(QObject *parent) : QObject(parent)
 {
 //    count = 0;
@@ -31,13 +32,17 @@ void AppCore::readyReadStandardError(){
 
 void AppCore::runAction()
 {
+    QObject* rootCB = this->parent()->findChild<QObject*>("startAsRoot");
+    bool startAsRoot = false;
+    if (rootCB != NULL)
+           startAsRoot = rootCB->property("checked").toBool() == true;
 
     QString program = "rsync";
     QStringList arguments;
-//    arguments << "-r" << "-t" << "-v" << "--progress" << "-s" << "/home/alexey/1" << "/home/alexey/2";
+    //arguments << "-r" << "-t" << "-v" << "--progress" << "-s" << "/home/alexey/1" << "/home/alexey/2";
 
     // временая заглушка для теста до полной настройки чекбоксов
-    arguments << "-r" << "-t" << "-v" << "--progress" << "-s";
+    //arguments << "-r" << "-t" << "-v" << "--progress" << "-s";
 
     // Получение кодов всех элементов интерфейса, начинающихся с "-" (чекбоксы) с последующим добавлением этих кодов в качестве параметров
     QList<QObject*> list = this->parent()->findChildren<QObject*>(QRegExp("^-"));
@@ -55,10 +60,33 @@ void AppCore::runAction()
     arguments << sourceField->property("text").toString();
     arguments << destinationField->property("text").toString();
 
+    if (startAsRoot)
+    {
+        arguments.push_front(program);
+        program = "pkexec";
+    }
     myProcess = new QProcess(parent());
     myProcess->start(program, arguments);
+    qDebug() << program;
 
     connect(myProcess,SIGNAL(readyReadStandardOutput()),this,SLOT(readyReadStandardOutput()));
     connect(myProcess,SIGNAL(readyReadStandardError()),this,SLOT(readyReadStandardError()));
 
+
+}
+
+
+void AppCore::cbClicked()
+{
+    QObject* fileCB = this->parent()->findChild<QObject*>("syncFiles");
+    syncFolders = fileCB->property("checked").toBool() == false;
+    QObject* fileDialog = this->parent()->findChild<QObject*>("fileDialogLoad");
+    if (fileDialog!= NULL){
+        fileDialog->setProperty("selectFolder",syncFolders);
+    }
+}
+
+bool AppCore::getSyncFolders()
+{
+    return syncFolders;
 }

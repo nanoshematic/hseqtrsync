@@ -28,3 +28,6 @@ HEADERS += \
     translatontest.h
 
 TRANSLATIONS += QmlLanguage_ru.ts
+
+DISTFILES += \
+    QmlLanguage_ru.ts
