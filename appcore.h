@@ -11,6 +11,8 @@ class AppCore : public QObject
     Q_OBJECT
 public:
     explicit AppCore(QObject *parent = 0);
+    bool syncFolders = true;
+    Q_INVOKABLE bool getSyncFolders();
 
 signals:
     // Сигнал для передачи данных в qml-интерфейс
@@ -21,6 +23,8 @@ public slots:
     void runAction();
     void readyReadStandardOutput();
     void readyReadStandardError();
+
+    void cbClicked();
 
 private:
 //    int count;  // Счетчик, которым будем оперировать

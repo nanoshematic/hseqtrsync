@@ -69,11 +69,11 @@ ApplicationWindow {
         OptionsTab {
             y: 94
             width : 590
-            height: 300
+            height: 200
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.maximumHeight: 150
+            Layout.maximumHeight: 200
             Layout.maximumWidth: 590
-            Layout.minimumHeight: 150
+            Layout.minimumHeight: 200
             Layout.minimumWidth: 590
         }
 

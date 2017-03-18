@@ -10,7 +10,7 @@ Item {
         anchors.topMargin: 5
         Grid {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            rows: 6
+            rows: 7
             columns : 2
             spacing : 5
 
@@ -90,7 +90,10 @@ Item {
                 enabled: false
             }
 
-
+            CheckBox {
+                objectName: "-n"
+                text: qsTr("Simulation run") + rootItem.emptyString
+            }
 
         }
     }

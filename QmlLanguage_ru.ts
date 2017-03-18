@@ -51,6 +51,10 @@
         <source>Protect remote args</source>
         <translation>Автоматически экранировать аргументы</translation>
     </message>
+    <message>
+        <source>Simulation run</source>
+        <translation>Запуск в режиме симуляции</translation>
+    </message>
 </context>
 <context>
     <name>MainOptionsTabContent</name>
