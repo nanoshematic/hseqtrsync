@@ -5,6 +5,7 @@
 #include <QString>
 #include <QVariant>
 #include <string>
+#include <QProcess>
 
 class AppCore : public QObject
 {
@@ -21,12 +22,28 @@ signals:
 public slots:
     // Слот для приёма данных из qml-интерфейса
     void runAction();
-    void readyReadStandardOutput();
-    void readyReadStandardError();
+    void readyReadStandardOutputB();
+    void readyReadStandardErrorB();
+    void readyReadStandardOutputR();
+    void readyReadStandardErrorR();
+    void readyReadStandardOutputA();
+    void readyReadStandardErrorA();
+
+    void finishedBeforeProcess(int exitCode, QProcess::ExitStatus exitStatus);
+    void finishedRsyncProcess(int exitCode, QProcess::ExitStatus exitStatus);
+    void finishedAfterProcess(int exitCode, QProcess::ExitStatus exitStatus);
 
     void cbClicked();
 
 private:
+    QProcess *beforeProcess = NULL, *myProcess = NULL, *afterProcess = NULL;
+    bool startBeforeProcess = false, startAfterProcess = false;
+    void getProgramArgs(QString input, QString &prog, QStringList &args);
+    int getStringFromTextField(QString fieldName, QString &res);
+    int getBoolValueFromCB(QString CBname);
+    void runRsync();
+    void runBefore();
+    void runAfter();
 //    int count;  // Счетчик, которым будем оперировать
 };
 
