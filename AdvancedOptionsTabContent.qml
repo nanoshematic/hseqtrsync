@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 Item {
-    id: item1
+    id: advancedTab
     ColumnLayout {
         width: 600
         anchors.top: parent.top

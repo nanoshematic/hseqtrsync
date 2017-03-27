@@ -6,6 +6,9 @@
 #include <QVariant>
 #include <string>
 #include <QProcess>
+#include <QJsonObject>
+#include "session.h"
+#include <QStringListModel>
 
 class AppCore : public QObject
 {
@@ -18,6 +21,7 @@ public:
 signals:
     // Сигнал для передачи данных в qml-интерфейс
     void sendConsoleOutput(QString output);
+    void setFlags(QStringList flags);
 
 public slots:
     // Слот для приёма данных из qml-интерфейса
@@ -35,6 +39,13 @@ public slots:
 
     void cbClicked();
 
+    void saveSettings();
+    void loadSettings();
+
+    void addSession(QString text);
+    void deleteSession();
+    void changeSession(int number) { };
+
 private:
     QProcess *beforeProcess = NULL, *myProcess = NULL, *afterProcess = NULL;
     bool startBeforeProcess = false, startAfterProcess = false;
@@ -44,6 +55,17 @@ private:
     void runRsync();
     void runBefore();
     void runAfter();
+
+    void read(const QJsonObject &json);
+    void write(QJsonObject &json) const;
+
+    int activeSessionIndex;
+    Session* activeSession;
+    QList<Session*> sessions;
+
+    void resetParameters();
+    void readParameters(Session session);
+    void setCurrentParameters();
 //    int count;  // Счетчик, которым будем оперировать
 };
 

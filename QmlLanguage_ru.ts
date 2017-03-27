@@ -13,7 +13,7 @@
     </message>
     <message>
         <source>Preserve devices</source>
-        <translation>Сохранять устройста как есть</translation>
+        <translation>Сохранять устройства как есть</translation>
     </message>
     <message>
         <source>Only update existing files</source>
@@ -144,12 +144,36 @@
 <context>
     <name>main</name>
     <message>
-        <source>Запустить</source>
+        <source>Add</source>
+        <translation>Новая</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
+        <source>Запуcтить</source>
         <translation type="obsolete">Запустить русский</translation>
     </message>
     <message>
         <source>Run</source>
         <translation>Запустить</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Язык</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation>Загрузить</translation>
     </message>
 </context>
 </TS>

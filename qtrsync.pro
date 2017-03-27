@@ -4,7 +4,8 @@ QT += qml quick quickcontrols2
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    appcore.cpp
+    appcore.cpp \
+    session.cpp
 
 lupdate_only {
     SOURCES += ExtendedOptionsTabContent.qml \
@@ -25,7 +26,8 @@ include(deployment.pri)
 
 HEADERS += \
     appcore.h \
-    translatontest.h
+    translatontest.h \
+    session.h
 
 TRANSLATIONS += QmlLanguage_ru.ts
 
