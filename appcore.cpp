@@ -9,11 +9,19 @@
 #include <string>
 #include <array>
 #include <QDebug>
-
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 AppCore::AppCore(QObject *parent) : QObject(parent)
 {
-//    count = 0;
+    Session* newSession = new Session();
+    QStringList arguments;
+    arguments << "-r" << "-t" << "-v" << "--progress" << "-s";
+    newSession->arguments = arguments;
+    sessions.append(newSession);
+    activeSessionIndex = 0;
+    activeSession = newSession;
 }
 
 void AppCore::readyReadStandardOutputB(){
@@ -51,60 +59,63 @@ void AppCore::readyReadStandardErrorA(){
 
 void AppCore::runAction()
 {
-
-
     if (getBoolValueFromCB("runBef")==1)
         runBefore();
     else
         runRsync();
-
 }
-
-
 
 void AppCore::runRsync()
 {
     QObject* rootCB = this->parent()->findChild<QObject*>("startAsRoot");
     bool startAsRoot = false;
     if (rootCB != NULL)
-           startAsRoot = rootCB->property("checked").toBool() == true;
-    QString program = "rsync";
+           startAsRoot = rootCB->property("checked").toBool();
+    QString rsyncName = "rsync";
+
+    // arguments collecting
+    //arguments << "-r" << "-t" << "-v" << "--progress" << "-s";
+
     QStringList arguments;
-    //arguments << "-r" << "-t" << "-v" << "--progress" << "-s" << "/home/alexey/1" << "/home/alexey/2";
+    QString argString;
+//    if (!this->parent()->findChildren<QObject*>(QRegExp("-zzza")).first()->property("checked").toBool())
+//    {
+        arguments << "-r";
+        argString.append("-r");
+//    }
 
-    // временая заглушка для теста до полной настройки чекбоксов
-    arguments << "-r" << "-t" << "-v" << "--progress" << "-s";
-
-    // Получение кодов всех элементов интерфейса, начинающихся с "-" (чекбоксы) с последующим добавлением этих кодов в качестве параметров
-    QList<QObject*> list = this->parent()->findChildren<QObject*>(QRegExp("^-"));
-    for (QList<QObject*>::iterator i = list.begin(); i != list.end(); i++) {
-        if ((*i)->property("checked").toBool() == true) {
-//            parameters += (*i)->property("objectName").toString().toStdString() + " ";
+    QList<QObject*> flags = this->parent()->findChildren<QObject*>(QRegExp("^-"));
+    for (QList<QObject*>::iterator i = flags.begin(); i != flags.end(); i++) {
+        if ((*i)->property("checked").toBool() && (*i)->property("objectName").toString() != "-zzza") {
             arguments << (*i)->property("objectName").toString();
+            argString.append(" " + (*i)->property("objectName").toString());
         }
     }
 
-    QObject* sourceField = this->parent()->findChild<QObject*>("source");
+    QObject* sourceField      = this->parent()->findChild<QObject*>("source");
     QObject* destinationField = this->parent()->findChild<QObject*>("destination");
 
-    // Добавляем source и destionation
     arguments << sourceField->property("text").toString();
     arguments << destinationField->property("text").toString();
 
+    argString.append(" " + this->parent()->findChild<QObject*>("source")->property("text").toString());
+    argString.append(" " + this->parent()->findChild<QObject*>("destination")->property("text").toString());
+
     if (startAsRoot)
     {
-        arguments.push_front(program);
-        program = "pkexec";
+        arguments.push_front(rsyncName);
+        rsyncName = "pkexec";
     }
     myProcess = new QProcess(parent());
-    myProcess->start(program, arguments);
+    myProcess->start(rsyncName, arguments);
+
+    emit sendConsoleOutput(argString);
 
     connect(myProcess,SIGNAL(readyReadStandardOutput()),this,SLOT(readyReadStandardOutputR()));
     connect(myProcess,SIGNAL(readyReadStandardError()),this,SLOT(readyReadStandardErrorR()));
     connect(myProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(finishedRsyncProcess(int,QProcess::ExitStatus)));
 
 }
-
 
 void AppCore::runBefore()
 {
@@ -229,3 +240,131 @@ int AppCore::getBoolValueFromCB(QString CBname)
     return 0;
 }
 
+void AppCore::saveSettings()
+{
+    QStringList arguments; arguments << "-r";
+
+    QList<QObject*> flags = this->parent()->findChildren<QObject*>(QRegExp("^-"));
+    for (QList<QObject*>::iterator i = flags.begin(); i != flags.end(); i++) {
+        if ((*i)->property("checked").toBool() && (*i)->property("objectName").toString() != "-zzza") {
+            arguments << (*i)->property("objectName").toString();
+        }
+    }
+
+    QObject* sourceField      = this->parent()->findChild<QObject*>("source");
+    QObject* destinationField = this->parent()->findChild<QObject*>("destination");
+
+    activeSession->source = sourceField->property("text").toString();
+    activeSession->destination = destinationField->property("text").toString();
+
+    activeSession->arguments = arguments;
+
+    QFile saveFile(QStringLiteral("save.json"));
+
+    if (!saveFile.open(QIODevice::WriteOnly)) {
+        qWarning("Couldn't open save file.");
+        return;
+    }
+
+    QJsonObject sessionObject;
+    write(sessionObject);
+
+    QJsonDocument saveDoc(sessionObject);
+    saveFile.write(saveDoc.toJson());
+}
+
+void AppCore::loadSettings()
+{
+    QFile loadFile(QStringLiteral("save.json"));
+
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open save file");
+        return;
+    }
+
+    QByteArray saveData = loadFile.readAll();
+
+    QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
+
+    read(loadDoc.object());
+}
+
+void AppCore::read(const QJsonObject &json)
+{
+    activeSessionIndex = json["active"].toInt();
+
+    sessions.clear();
+
+    QJsonArray sessionArray = json["sessions"].toArray();
+    for (int sessionIndex = 0; sessionIndex < sessionArray.size(); sessionIndex++)
+    {
+        QJsonObject sessionObject = sessionArray[sessionIndex].toObject();
+        Session* session = new Session();
+        session->read(sessionObject);
+        sessions.append(session);
+    }
+
+    activeSession = sessions.at(activeSessionIndex);
+    setCurrentParameters();
+}
+
+void AppCore::write(QJsonObject &json) const
+{
+    json["active"] = activeSessionIndex;
+
+    QJsonArray sessionArray;
+    foreach (const Session* session, sessions) {
+        QJsonObject sessionObject;
+        session->write(sessionObject);
+        sessionArray.append(sessionObject);
+    }
+
+    json["sessions"] = sessionArray;
+    }
+
+void AppCore::addSession(QString text)
+{
+    Session* newSession = new Session();
+//    QObj
+//    newSession->name = this->parent()->findChild<QObject*>("cbbSession")->property("currentText").toString();
+    QStringList arguments;
+    arguments << "-r" << "-t" << "-v" << "--progress" << "-s";
+    newSession->arguments = arguments;
+    sessions.append(newSession);
+    activeSessionIndex = sessions.size() - 1;
+    activeSession = newSession;
+    setCurrentParameters();
+}
+
+void AppCore::deleteSession()
+{
+    resetParameters();
+    sessions.removeAt(activeSessionIndex);
+    activeSessionIndex = sessions.size() - 1;
+    if (activeSessionIndex == -1)
+    {
+        addSession("default");
+    }
+    setCurrentParameters();
+}
+
+void AppCore::resetParameters()
+{
+    QList<QObject*> list = this->parent()->findChildren<QObject*>(QRegExp("^-"));
+    for (QList<QObject*>::iterator i = list.begin(); i != list.end(); i++) {
+        (*i)->setProperty("checked", false);
+    }
+    this->parent()->findChild<QObject*>("source")->setProperty("text", QString(""));
+    this->parent()->findChild<QObject*>("destination")->setProperty("text", QString(""));
+}
+
+void AppCore::setCurrentParameters()
+{
+    resetParameters();
+    foreach (QString arg, activeSession->arguments) {
+        if (arg != "-r" && arg != "-s" && arg != "")
+            this->parent()->findChild<QObject*>(arg)->setProperty("checked",true);
+    }
+    this->parent()->findChild<QObject*>("source")->setProperty("text", activeSession->source);
+    this->parent()->findChild<QObject*>("destination")->setProperty("text", activeSession->destination);
+}
